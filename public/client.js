@@ -1189,16 +1189,29 @@ function renderSeats(state) {
   }
 }
 
+let lastAnnouncedWinnerHand = -1;
+
 function renderWinnerBanner(state) {
   const banner = document.getElementById('winner-banner');
-  if (state.winners && state.winners.length > 0 && (state.stage === 'showdown' || state.stage === 'hand_ended')) {
+  if (!banner) return;
+
+  if (state.winners && state.winners.length > 0) {
     if (state.winners.length === 1) {
       const winner = state.winners[0];
-      document.getElementById('winner-title').textContent = `🏆 ${winner.name}`;
+      const titleEl = document.getElementById('winner-title');
+      const descEl = document.getElementById('winner-desc');
+      if (titleEl) titleEl.textContent = `🏆 ${winner.name}`;
       const descText = currentLang === 'ar' 
         ? `فاز بمبلغ $${winner.amountWon.toLocaleString()} بـ ${translateHandDescription(winner.handDescription)}`
         : `Won $${winner.amountWon.toLocaleString()} with ${winner.handDescription}`;
-      document.getElementById('winner-desc').textContent = descText;
+      if (descEl) descEl.textContent = descText;
+
+      // Trigger one-time victory toast for this hand
+      if (lastAnnouncedWinnerHand !== state.handNumber) {
+        lastAnnouncedWinnerHand = state.handNumber;
+        playSound('win');
+        showToast(`🏆 ${winner.name}: ${descText}`, 'success');
+      }
     } else {
       const names = state.winners.map(w => w.name).join(' & ');
       const eachWon = state.winners[0].amountWon.toLocaleString();
@@ -1208,11 +1221,18 @@ function renderWinnerBanner(state) {
       const descText = currentLang === 'ar'
         ? `ربح كل لاعب $${eachWon} بـ ${translateHandDescription(state.winners[0].handDescription)}`
         : `Each won $${eachWon} with ${state.winners[0].handDescription}`;
-      document.getElementById('winner-title').textContent = titleText;
-      document.getElementById('winner-desc').textContent = descText;
+      const titleEl = document.getElementById('winner-title');
+      const descEl = document.getElementById('winner-desc');
+      if (titleEl) titleEl.textContent = titleText;
+      if (descEl) descEl.textContent = descText;
+
+      if (lastAnnouncedWinnerHand !== state.handNumber) {
+        lastAnnouncedWinnerHand = state.handNumber;
+        playSound('win');
+        showToast(`${titleText} (${descText})`, 'success');
+      }
     }
     banner.classList.remove('hidden');
-    playSound('win');
   } else {
     banner.classList.add('hidden');
   }

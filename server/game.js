@@ -863,7 +863,8 @@ class PokerGame {
     if (eligible.length >= 2) {
       this.setPendingHostAction('start_next_hand', 'Start Next Hand');
     } else {
-      this.stage = STAGES.WAITING;
+      this.stage = STAGES.HAND_ENDED;
+      this.pendingHostAction = null;
       this.log('Hand finished: Need at least 2 players with chips to start next hand.');
       this.notifyState();
     }
@@ -910,9 +911,9 @@ class PokerGame {
           disconnected: p.disconnected,
           lastAction: p.lastAction,
           hasCards: p.holeCards && p.holeCards.length > 0 && !p.folded,
-          // Reveal cards only at showdown or if player won/chose to show
-          holeCards: (this.stage === STAGES.SHOWDOWN || p.showCards) ? p.holeCards : [],
-          evaluatedHand: (this.stage === STAGES.SHOWDOWN && p.evaluatedHand) ? {
+          // Reveal cards at showdown, when hand ended, or if player won/chose to show
+          holeCards: (this.stage === STAGES.SHOWDOWN || this.stage === STAGES.HAND_ENDED || (this.winners && this.winners.length > 0) || p.showCards) ? p.holeCards : [],
+          evaluatedHand: ((this.stage === STAGES.SHOWDOWN || this.stage === STAGES.HAND_ENDED || (this.winners && this.winners.length > 0) || p.showCards) && p.evaluatedHand) ? {
             name: p.evaluatedHand.name,
             description: p.evaluatedHand.description
           } : null
