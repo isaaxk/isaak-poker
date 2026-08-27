@@ -638,10 +638,15 @@ function showConfirmDialog(options = {}) {
 function closeConfirmModal(confirmed) {
   const modal = document.getElementById('confirm-modal');
   if (modal) modal.classList.add('hidden');
-  if (confirmed && typeof pendingConfirmCallback === 'function') {
-    pendingConfirmCallback();
-  }
+  const cb = pendingConfirmCallback;
   pendingConfirmCallback = null;
+  if (confirmed && typeof cb === 'function') {
+    try {
+      cb();
+    } catch (err) {
+      console.error('Error executing confirm callback:', err);
+    }
+  }
 }
 
 function closeModalOnBackdrop(e) {
@@ -947,8 +952,30 @@ function switchToTableView() {
 }
 
 function switchToLobbyView() {
-  document.getElementById('game-view').classList.remove('active');
-  document.getElementById('lobby-view').classList.add('active');
+  currentRoomCode = null;
+  lastGameState = null;
+  sessionStorage.removeItem('poker_room');
+
+  // Remove query param from URL if present
+  if (window.location.search) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  const gameView = document.getElementById('game-view');
+  const lobbyView = document.getElementById('lobby-view');
+
+  if (gameView) gameView.classList.remove('active');
+  if (lobbyView) lobbyView.classList.add('active');
+
+  const joinCode = document.getElementById('join-code');
+  if (joinCode) joinCode.value = '';
+
+  closeHandRankingsModal();
+  closeSettingsModal();
+  closeConfirmModal(false);
+
+  const drawer = document.getElementById('side-drawer');
+  if (drawer) drawer.classList.remove('open');
 }
 
 // ==========================================
@@ -956,6 +983,7 @@ function switchToLobbyView() {
 // ==========================================
 
 function renderGameState(state) {
+  if (!currentRoomCode) return; // Ignore updates if in lobby
   const prevState = lastGameState;
   lastGameState = state;
 
