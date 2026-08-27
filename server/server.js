@@ -76,7 +76,7 @@ io.on('connection', (socket) => {
       const maxSeats = Math.min(Math.max(Number(data.maxSeats) || 8, 2), 20);
       const turnTimeoutMs = data.turnTimeoutSeconds !== undefined
         ? Number(data.turnTimeoutSeconds) * 1000
-        : (data.turnTimeoutMs !== undefined ? Number(data.turnTimeoutMs) : 30000);
+        : (data.turnTimeoutMs !== undefined ? Number(data.turnTimeoutMs) : 0);
 
       const config = {
         smallBlind,

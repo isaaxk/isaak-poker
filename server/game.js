@@ -19,7 +19,7 @@ class PokerGame {
       bigBlind: Number(config.bigBlind) || 20,
       startingChips: Number(config.startingChips) || 1000,
       maxSeats: Math.min(Math.max(Number(config.maxSeats) || 8, 2), 20),
-      turnTimeoutMs: config.turnTimeoutMs !== undefined ? Number(config.turnTimeoutMs) : 30000,
+      turnTimeoutMs: config.turnTimeoutMs !== undefined ? Number(config.turnTimeoutMs) : 0,
       nextHandDelayMs: config.nextHandDelayMs || 6000,
       showHandHelper: config.showHandHelper !== undefined ? Boolean(config.showHandHelper) : true
     };

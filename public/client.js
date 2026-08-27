@@ -701,7 +701,7 @@ function onSettingBigBlindChange(bbValue) {
 function openSettingsModal() {
   if (lastGameState && lastGameState.config) {
     const cfg = lastGameState.config;
-    const seconds = cfg.turnTimeoutMs !== undefined ? Math.floor(cfg.turnTimeoutMs / 1000) : 30;
+    const seconds = cfg.turnTimeoutMs !== undefined ? Math.floor(cfg.turnTimeoutMs / 1000) : 0;
     const bb = cfg.bigBlind || 20;
     const sb = cfg.smallBlind || Math.max(1, Math.floor(bb / 2));
     document.getElementById('setting-turn-timer').value = seconds;
@@ -744,15 +744,16 @@ function handleSaveSettings(e) {
   e.preventDefault();
   if (!isHost) return;
 
-  const turnSeconds = Number(document.getElementById('setting-turn-timer').value);
+  const turnTimerVal = document.getElementById('setting-turn-timer').value;
+  const turnSeconds = turnTimerVal !== '' ? Math.max(0, Number(turnTimerVal)) : 0;
   const maxSeats = Math.min(Math.max(Number(document.getElementById('setting-max-seats').value) || 8, 2), 20);
   const bigBlind = Math.max(2, Number(document.getElementById('setting-big-blind').value) || 20);
   const smallBlind = Math.max(1, Math.floor(bigBlind / 2));
-  const startingChips = Math.max(10, Number(document.getElementById('setting-starting-chips').value) || 1000);
+  const startingChips = Math.max(1, Number(document.getElementById('setting-starting-chips').value) || 1000);
   const showHandHelper = document.getElementById('setting-hand-helper').checked;
 
   socket.emit('update_room_settings', {
-    turnTimeoutSeconds: turnSeconds >= 0 ? turnSeconds : 30,
+    turnTimeoutSeconds: turnSeconds,
     maxSeats: maxSeats,
     smallBlind: smallBlind,
     bigBlind: bigBlind,
@@ -787,10 +788,11 @@ function handleCreateRoom() {
   const nameInput = document.getElementById('create-name').value.trim();
   const name = nameInput || 'Host';
   const maxSeats = Math.min(Math.max(Number(document.getElementById('max-seats').value) || 6, 2), 20);
-  const startingChips = Math.max(10, Number(document.getElementById('starting-chips').value) || 1000);
+  const startingChips = Math.max(1, Number(document.getElementById('starting-chips').value) || 1000);
   const bigBlind = Math.max(2, Number(document.getElementById('big-blind').value) || 20);
   const smallBlind = Math.max(1, Math.floor(bigBlind / 2));
-  const turnSeconds = Number(document.getElementById('turn-timer').value);
+  const turnTimerVal = document.getElementById('turn-timer').value;
+  const turnSeconds = turnTimerVal !== '' ? Math.max(0, Number(turnTimerVal)) : 0;
   const showHandHelper = document.getElementById('show-hand-helper').checked;
 
   if (!myPlayerId) {
@@ -807,7 +809,7 @@ function handleCreateRoom() {
     smallBlind: smallBlind,
     bigBlind: bigBlind,
     maxSeats: maxSeats,
-    turnTimeoutSeconds: turnSeconds >= 0 ? turnSeconds : 30,
+    turnTimeoutSeconds: turnSeconds,
     showHandHelper: Boolean(showHandHelper)
   });
 }
