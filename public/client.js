@@ -1303,7 +1303,19 @@ function renderActionControls(state) {
       btnHostStart.classList.add('hidden');
       if (isHost) {
         if (state.pendingHostAction === 'start_next_hand') {
-          waitingText.innerHTML = t('hand_finished_host');
+          let winnerHtml = '';
+          if (state.winners && state.winners.length > 0) {
+            if (state.winners.length === 1) {
+              const w = state.winners[0];
+              const desc = currentLang === 'ar' ? translateHandDescription(w.handDescription) : w.handDescription;
+              winnerHtml = `<div style="color:var(--gold-primary); font-size:1.05rem; font-weight:800; margin-bottom:4px;">🏆 ${escapeHtml(w.name)} — $${w.amountWon.toLocaleString()} (${desc})</div>`;
+            } else {
+              const names = state.winners.map(w => escapeHtml(w.name)).join(' & ');
+              const eachWon = state.winners[0].amountWon.toLocaleString();
+              winnerHtml = `<div style="color:var(--gold-primary); font-size:1.05rem; font-weight:800; margin-bottom:4px;">🤝 Split Pot: ${names} ($${eachWon})</div>`;
+            }
+          }
+          waitingText.innerHTML = `${winnerHtml}<div>${t('hand_finished_host')}</div>`;
           btnHostDeal.innerHTML = t('btn_start_next_hand');
         } else {
           waitingText.innerHTML = t('creator_ready_reveal');
@@ -1315,7 +1327,15 @@ function renderActionControls(state) {
       } else {
         const hostActionKey = state.pendingHostAction;
         const hostActionLabel = t(hostActionKey) || state.pendingHostActionLabel || 'proceed';
-        waitingText.textContent = t('creator_waiting_prompt', { action: hostActionLabel.toLowerCase() });
+        let winnerHtml = '';
+        if (state.pendingHostAction === 'start_next_hand' && state.winners && state.winners.length > 0) {
+          if (state.winners.length === 1) {
+            const w = state.winners[0];
+            const desc = currentLang === 'ar' ? translateHandDescription(w.handDescription) : w.handDescription;
+            winnerHtml = `<div style="color:var(--gold-primary); font-size:1.05rem; font-weight:800; margin-bottom:4px;">🏆 ${escapeHtml(w.name)} — $${w.amountWon.toLocaleString()} (${desc})</div>`;
+          }
+        }
+        waitingText.innerHTML = `${winnerHtml}<div>${t('creator_waiting_prompt', { action: hostActionLabel.toLowerCase() })}</div>`;
         btnHostDeal.classList.add('hidden');
       }
     } else if (isWaitingOrEnded) {
