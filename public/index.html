@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Texas Hold'em Poker - Multiplayer</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Background Ambient Glow -->
+  <div class="ambient-bg"></div>
+
+  <!-- Notification Toast Area -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- LOBBY SCREEN -->
+  <div id="lobby-view" class="view-screen active">
+    <div class="lobby-container">
+      <div class="lobby-top-bar">
+        <button id="lobby-lang-btn" class="btn btn-sm btn-outline lang-toggle-btn" onclick="toggleLanguage()" title="Change Platform Language / تغيير لغة المنصة">
+          🌐 العربية
+        </button>
+      </div>
+
+      <div class="brand-header">
+        <div class="brand-badge">♠ ♥ ♦ ♣</div>
+        <div id="i18n-creator-tag" class="brand-creator-tag">ISHAK EL-9AMARDJII</div>
+        <h1 id="i18n-brand-title" class="brand-title">ROYAL HOLD'EM</h1>
+        <p id="i18n-brand-subtitle" class="brand-subtitle">Real-Time Multiplayer Texas Hold'em Poker</p>
+      </div>
+
+      <div class="lobby-card">
+        <div class="tab-switcher">
+          <button id="tab-join" class="tab-btn active" onclick="switchLobbyTab('join')">Join Room</button>
+          <button id="tab-create" class="tab-btn" onclick="switchLobbyTab('create')">Create Room</button>
+        </div>
+
+        <!-- Join Form -->
+        <div id="form-join" class="tab-content active">
+          <div class="form-group">
+            <label id="lbl-join-name" for="join-name">Your Display Name</label>
+            <input type="text" id="join-name" placeholder="Enter your nickname" maxlength="15" autofocus>
+          </div>
+          <div class="form-group">
+            <label id="lbl-join-code" for="join-code">Room Code</label>
+            <input type="text" id="join-code" class="code-input" placeholder="e.g. A9B2X7" maxlength="6">
+          </div>
+          <button class="btn btn-primary btn-block" onclick="handleJoinRoom()">
+            <span id="btn-join-text" class="btn-text">Join Table</span>
+          </button>
+        </div>
+
+        <!-- Create Form -->
+        <div id="form-create" class="tab-content">
+          <div class="form-group">
+            <label id="lbl-create-name" for="create-name">Your Display Name</label>
+            <input type="text" id="create-name" placeholder="Enter your nickname" maxlength="15">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label id="lbl-starting-chips" for="starting-chips">Starting Chips ($)</label>
+              <input type="number" id="starting-chips" min="10" max="1000000" step="50" value="1000" placeholder="e.g. 1000">
+            </div>
+            <div class="form-group">
+              <label id="lbl-max-seats" for="max-seats">Max Players (2 - 20)</label>
+              <input type="number" id="max-seats" min="2" max="20" step="1" value="6" placeholder="2 to 20">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label id="lbl-small-blind" for="small-blind">Small Blind ($)</label>
+              <input type="number" id="small-blind" min="1" max="50000" step="5" value="10" placeholder="e.g. 10">
+            </div>
+            <div class="form-group">
+              <label id="lbl-big-blind" for="big-blind">Big Blind ($)</label>
+              <input type="number" id="big-blind" min="2" max="100000" step="10" value="20" placeholder="e.g. 20">
+            </div>
+          </div>
+          <div class="form-group">
+            <label id="lbl-turn-timer" for="turn-timer">Turn Timer (Seconds, 0 = Unlimited)</label>
+            <input type="number" id="turn-timer" min="0" max="300" step="5" value="30" placeholder="Seconds (0 for no timer)">
+          </div>
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="show-hand-helper" checked>
+              <span id="lbl-show-hand-helper">Show Hand Name Helper (e.g. Two Pair, Flush)</span>
+            </label>
+          </div>
+          <button class="btn btn-gold btn-block" onclick="handleCreateRoom()">
+            <span id="btn-create-text" class="btn-text">Create Private Room</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hand Rankings Modal Trigger -->
+      <div class="lobby-footer">
+        <button id="btn-lobby-rankings" class="btn-link" onclick="openHandRankingsModal()">📖 دليل ترتيب أيدي البوكر (Hand Rankings Guide)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME TABLE SCREEN -->
+  <div id="game-view" class="view-screen">
+    <!-- Top Bar -->
+    <header class="game-header">
+      <div class="header-left">
+        <div class="room-code-badge" onclick="copyRoomCode()" title="Click to copy room code">
+          <span id="badge-room-label" class="badge-label">ROOM</span>
+          <span id="header-room-code" class="badge-code">------</span>
+          <span class="copy-icon">📋</span>
+        </div>
+        <button class="btn btn-sm btn-outline" onclick="copyInviteLink()">
+          <span id="btn-share-link-text">🔗 Share Link</span>
+        </button>
+      </div>
+
+      <div class="header-center">
+        <div id="hand-indicator" class="hand-indicator">Hand #1</div>
+        <div id="stage-indicator" class="stage-indicator">WAITING</div>
+      </div>
+
+      <div class="header-right">
+        <button id="game-lang-btn" class="btn btn-sm btn-outline lang-toggle-btn" onclick="toggleLanguage()" title="Change Platform Language / تغيير لغة المنصة">
+          🌐 العربية
+        </button>
+        <button id="btn-open-rankings" class="btn btn-sm btn-outline" onclick="openHandRankingsModal()" title="View Poker Hand Rankings Chart">
+          🃏 Hand Rankings
+        </button>
+        <button id="btn-open-settings" class="btn btn-sm btn-outline" onclick="openSettingsModal()" title="Table Settings">
+          ⚙️ Settings
+        </button>
+        <button id="sound-btn" class="btn btn-sm btn-icon" onclick="toggleSound()" title="Toggle Sound">
+          🔊
+        </button>
+        <button id="btn-leave" class="btn btn-sm btn-danger" onclick="handleLeaveRoom()">
+          Leave
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Poker Arena -->
+    <main class="table-container">
+      <div class="poker-table-wrapper">
+        <div class="poker-table">
+          <!-- Outer Rail and Inner Felt -->
+          <div class="table-felt">
+            <div class="table-brand-watermark">
+              <span id="i18n-table-creator-tag" class="watermark-creator-tag">ISHAK EL-9AMARDJII</span>
+              <span class="watermark-title">TEXAS HOLD'EM</span>
+            </div>
+
+            <!-- Community Area -->
+            <div class="community-area">
+              <!-- Pot Display -->
+              <div class="pot-display">
+                <div class="pot-icon">🪙</div>
+                <div class="pot-info">
+                  <span class="pot-label">TOTAL POT</span>
+                  <span id="pot-amount" class="pot-value">$0</span>
+                </div>
+              </div>
+
+              <!-- Community Cards -->
+              <div id="community-cards" class="community-cards-container">
+                <div class="card-slot empty" id="slot-0"></div>
+                <div class="card-slot empty" id="slot-1"></div>
+                <div class="card-slot empty" id="slot-2"></div>
+                <div class="card-slot empty" id="slot-3"></div>
+                <div class="card-slot empty" id="slot-4"></div>
+              </div>
+
+              <!-- Winner Banner -->
+              <div id="winner-banner" class="winner-banner hidden">
+                <div class="winner-trophy">🏆</div>
+                <div class="winner-text-group">
+                  <div id="winner-title" class="winner-title">Winner Name</div>
+                  <div id="winner-desc" class="winner-desc">Won $0 with Full House</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 8 Player Seats Positioned Around Table -->
+            <div class="seats-container" id="seats-container">
+              <!-- Seats 0 to 7 generated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hand Strength Floating Preview (For current user) -->
+      <div id="my-hand-strength" class="my-hand-strength hidden">
+        <span id="my-hand-strength-label" class="strength-label">Current Hand:</span>
+        <span id="hand-strength-name" class="strength-name">Two Pair</span>
+      </div>
+    </main>
+
+    <!-- Bottom Action Controls -->
+    <footer class="action-panel">
+      <!-- Waiting/Spectator Notice -->
+      <div id="panel-waiting" class="panel-state active">
+        <div class="waiting-message">
+          <span id="waiting-text">Waiting for host to start the game...</span>
+          <button id="btn-host-deal" class="btn btn-gold btn-lg btn-pulse hidden" onclick="handleHostAdvanceStage()">
+            🎴 Deal Flop (3 Cards)
+          </button>
+          <button id="btn-host-start" class="btn btn-gold hidden" onclick="handleStartGame()">
+            🎮 Start Hand Now
+          </button>
+          <button id="btn-rebuy" class="btn btn-outline btn-reload-table-small hidden" onclick="handleRebuy()" title="Reload chips for table">
+            💰 Reload Table
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Turn Controls -->
+      <div id="panel-actions" class="panel-state">
+        <div class="action-controls-wrapper">
+          <!-- Raise Controls Top Bar -->
+          <div id="raise-controls" class="raise-controls-row">
+            <div class="raise-presets">
+              <button class="btn btn-chip" onclick="setRaisePreset('min')">Min</button>
+              <button class="btn btn-chip" onclick="setRaisePreset('2x')">2x</button>
+              <button class="btn btn-chip" onclick="setRaisePreset('3x')">3x</button>
+              <button class="btn btn-chip" onclick="setRaisePreset('pot')">Pot</button>
+              <button class="btn btn-chip" onclick="setRaisePreset('allin')">All-In</button>
+            </div>
+            <div class="raise-slider-group">
+              <input type="range" id="raise-slider" min="0" max="1000" step="10" oninput="onRaiseSliderInput(this.value)">
+              <div class="raise-input-box">
+                <span class="currency">$</span>
+                <input type="number" id="raise-input" min="0" max="1000" onchange="onRaiseNumberInput(this.value)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Action Buttons -->
+          <div class="main-actions-row">
+            <button id="btn-fold" class="btn btn-action btn-fold" onclick="handleAction('fold')">
+              <span id="btn-fold-title" class="action-title">FOLD</span>
+              <span id="btn-fold-sub" class="action-sub">Forfeit hand</span>
+            </button>
+
+            <button id="btn-check" class="btn btn-action btn-check" onclick="handleAction('check')">
+              <span id="btn-check-title" class="action-title">CHECK</span>
+              <span id="btn-check-sub" class="action-sub">Pass action</span>
+            </button>
+
+            <button id="btn-call" class="btn btn-action btn-call" onclick="handleAction('call')">
+              <span id="call-button-title" class="action-title">CALL</span>
+              <span id="call-amount-label" class="action-sub">$0</span>
+            </button>
+
+            <button id="btn-raise" class="btn btn-action btn-raise" onclick="handleAction('raise')">
+              <span id="raise-button-title" class="action-title">RAISE TO</span>
+              <span id="raise-amount-label" class="action-sub">$0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Collapsible Hand Log & Chat Drawer -->
+    <div id="side-drawer" class="side-drawer">
+      <button class="drawer-toggle-btn" onclick="toggleSideDrawer()" title="Toggle Log / Chat">
+        📜 <span class="drawer-badge" id="log-count">0</span>
+      </button>
+      <div class="drawer-content">
+        <div class="drawer-tabs">
+          <button id="tab-log" class="drawer-tab-btn active" onclick="switchDrawerTab('log')">Table Log</button>
+          <button id="tab-chat" class="drawer-tab-btn" onclick="switchDrawerTab('chat')">Chat</button>
+        </div>
+
+        <div id="drawer-log-pane" class="drawer-pane active">
+          <div id="log-messages" class="messages-container"></div>
+        </div>
+
+        <div id="drawer-chat-pane" class="drawer-pane">
+          <div id="chat-messages" class="messages-container"></div>
+          <form class="chat-input-form" onsubmit="handleSendChat(event)">
+            <input type="text" id="chat-input" placeholder="Type a message..." maxlength="100">
+            <button id="btn-chat-send" type="submit" class="btn btn-sm btn-primary">Send</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hand Rankings Help Modal with Visual Chart Image -->
+  <div id="rankings-modal" class="modal-overlay hidden" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h2 id="rankings-modal-title">🃏 دليل ترتيب أيدي البوكر (Hand Rankings)</h2>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div class="modal-tab-group">
+            <button id="btn-tab-chart" class="modal-tab active" onclick="switchRankingsTab('chart')">🖼️ الصورة (Chart)</button>
+            <button id="btn-tab-text" class="modal-tab" onclick="switchRankingsTab('text')">📝 القائمة بالعربية</button>
+          </div>
+          <button class="btn-close" onclick="closeHandRankingsModal()" title="إغلاق (Esc)">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <!-- Visual Image Chart Pane -->
+        <div id="pane-chart" class="rankings-pane active">
+          <div class="hand-ranking-img-wrapper">
+            <img src="/hand-rankings.jpg" alt="Poker Hand Rankings Guide" class="hand-ranking-img">
+          </div>
+          <div style="text-align: center; margin-top: 12px;">
+            <button id="btn-close-chart" class="btn btn-gold" onclick="closeHandRankingsModal()">
+              ✓ إغلاق والعودة للعبة
+            </button>
+          </div>
+        </div>
+
+        <!-- Arabic Text List Pane -->
+        <div id="pane-text" class="rankings-pane rankings-list" dir="rtl" style="text-align: right;">
+          <div class="ranking-item">
+            <span class="rank-num">1</span>
+            <div class="rank-info">
+              <strong>رويال فلاش (Royal Flush) - الفلاش الملكي</strong>
+              <p>أقوى يد في لعبة البوكر على الإطلاق: خمس بطاقات من نفس الرمز واللون من العشرة إلى الآس <span class="card-example">(مثال: A♠ K♠ Q♠ J♠ 10♠)</span></p>
+            </div>
+          </div>
+          <div class="ranking-item">
+            <span class="rank-num">2</span>
+            <div class="rank-info">
+              <strong>ستريت فلاش (Straight Flush) - المتتالية المتجانسة</strong>
+              <p>خمس بطاقات متتالية بالترتيب ومن نفس الرمز والنوع <span class="card-example">(مثال: 9♥ 8♥ 7♥ 6♥ 5♥)</span></p>
+            </div>
+          </div>
+          <div class="ranking-item">
+            <span class="rank-num">3</span>
+            <div class="rank-info">
+              <strong>فور أوف كايند (Four of a Kind) - أربع بطاقات متطابقة</strong>
+              <p>أربع بطاقات متطابقة من نفس القيمة تماماً مع بطاقة خامسة <span class="card-example">(مثال: 9♠ 9♥ 9♦ 9♣ K♦)</span></p>
+            </div>
+          </div>
+          <div class="ranking-item">
+            <span class="rank-num">4</span>
+            <div class="rank-info">
+              <strong>فول هاوس (Full House) - البيت الكامل</strong>
+              <p>ثلاث بطاقات من نفس القيمة مع زوج متطابق من قيمة أخرى <span class="card-example">(مثال: A♠ A♥ A♦ K♣ K♠)</span></p>
+            </div>
+          </div>
+          <div class="ranking-item">
+            <span class="rank-num">5</span>
+            <div class="rank-info">
+              <strong>فلاش (Flush) - اللون المتجانس</strong>
+              <p>خمس بطاقات من نفس الرمز والنوع غير متتالية بالترتيب <span class="card-example">(مثال: K♦ J♦ 9♦ 6♦ 3♦)</span></p>
+            </div>
+          </div>
+          <div class="ranking-item">
+            <span class="rank-num">6</span>
+            <div class="rank-info">
+              <strong>ستريت (Straight) - المتتالية</strong>
+              <p>خمس بطاقات متتالية بالترتيب من أنواع أو رموز مختلفة <span class="card-example">(مثال: 8♣ 7♠ 6♥ 5♦ 4♠)</span></p>
+            </div>
+          </div>
+          <div class="ranking-item">
+            <span class="rank-num">7</span>
+            <div class="rank-info">
+              <strong>ثري أوف كايند (Three of a Kind) - ثلاث بطاقات متطابقة</strong>
+              <p>ثلاث بطاقات من نفس القيمة مع بطاقتين جانبيتين مختلفتين <span class="card-example">(مثال: Q♠ Q♥ Q♦ 8♣ 4♠)</span></p>
+            </div>
+          </div>
+          <div class="ranking-item">
+            <span class="rank-num">8</span>
+            <div class="rank-info">
+              <strong>تو بير (Two Pair) - زوجان</strong>
+              <p>زوجان مختلفان من البطاقات المتطابقة مع بطاقة خامسة كيكر <span class="card-example">(مثال: J♠ J♦ 8♣ 8♥ A♠)</span></p>
+            </div>
+          </div>
+          <div class="ranking-item">
+            <span class="rank-num">9</span>
+            <div class="rank-info">
+              <strong>ون بير (One Pair) - زوج واحد</strong>
+              <p>بطاقتان فقط متطابقتان من نفس القيمة مع ثلاث بطاقات جانبية <span class="card-example">(مثال: 10♠ 10♥ K♣ 7♦ 4♠)</span></p>
+            </div>
+          </div>
+          <div class="ranking-item">
+            <span class="rank-num">10</span>
+            <div class="rank-info">
+              <strong>هاي كارد (High Card) - البطاقة الأعلى</strong>
+              <p>عندما لا يمتلك أي لاعب أي تركيبة، يفوز اللاعب صاحب أعلى بطاقة في يده <span class="card-example">(مثال: A♠ J♦ 8♣ 6♥ 2♠)</span></p>
+            </div>
+          </div>
+          <div style="text-align: center; margin-top: 12px;">
+            <button id="btn-close-list" class="btn btn-gold" onclick="closeHandRankingsModal()">
+              ✓ إغلاق والعودة للعبة
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Settings Modal (Host configurable mid-game) -->
+  <div id="settings-modal" class="modal-overlay hidden" onclick="closeSettingsOnBackdrop(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="settings-modal-title">⚙️ Table & Game Settings</h2>
+        <button class="btn-close" onclick="closeSettingsModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="settings-form" onsubmit="handleSaveSettings(event)" style="display:flex; flex-direction:column; gap:16px;">
+          <div class="form-row">
+            <div class="form-group">
+              <label id="lbl-setting-turn-timer" for="setting-turn-timer">Turn Time (Seconds, 0 = Unlimited)</label>
+              <input type="number" id="setting-turn-timer" min="0" max="300" step="5" placeholder="e.g. 30">
+            </div>
+            <div class="form-group">
+              <label id="lbl-setting-max-seats" for="setting-max-seats">Max Players (2 - 20)</label>
+              <input type="number" id="setting-max-seats" min="2" max="20" step="1" placeholder="2 to 20">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label id="lbl-setting-small-blind" for="setting-small-blind">Small Blind ($)</label>
+              <input type="number" id="setting-small-blind" min="1" max="50000" step="5" placeholder="e.g. 10">
+            </div>
+            <div class="form-group">
+              <label id="lbl-setting-big-blind" for="setting-big-blind">Big Blind ($)</label>
+              <input type="number" id="setting-big-blind" min="2" max="100000" step="10" placeholder="e.g. 20">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label id="lbl-setting-starting-chips" for="setting-starting-chips">Starting / Reload Chips ($)</label>
+            <input type="number" id="setting-starting-chips" min="10" max="1000000" step="50" placeholder="e.g. 1000">
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="setting-hand-helper">
+              <span id="lbl-setting-hand-helper">Tell player the name of their hand (e.g. Flush, Full House)</span>
+            </label>
+          </div>
+
+          <div id="settings-host-notice" class="host-notice" style="font-size:0.8rem; color:var(--text-muted);">
+            * Anyone can view settings, but only the table Host can save changes.
+          </div>
+
+          <button id="btn-save-settings" type="submit" class="btn btn-gold btn-block">
+            Save Table Settings
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>

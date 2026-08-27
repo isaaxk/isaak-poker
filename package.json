@@ -1,0 +1,17 @@
+{
+  "name": "multiplayer-poker",
+  "version": "1.0.0",
+  "description": "Real-time Multiplayer Texas Hold'em Poker Game with Node.js and Socket.io",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node test/evaluator.test.js && node test/game.test.js"
+  },
+  "keywords": ["poker", "texas-holdem", "socketio", "multiplayer", "realtime", "nodejs"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}
