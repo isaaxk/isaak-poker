@@ -104,40 +104,46 @@
 
   <!-- GAME TABLE SCREEN -->
   <div id="game-view" class="view-screen">
-    <!-- Top Bar -->
+    <!-- Top Bar (2-Row Responsive Bar on Mobile, Unified Bar on Desktop) -->
     <header class="game-header">
-      <div class="header-left">
-        <div class="room-code-badge" onclick="copyRoomCode()" title="Click to copy room code">
-          <span id="badge-room-label" class="badge-label">ROOM</span>
-          <span id="header-room-code" class="badge-code">------</span>
-          <span class="copy-icon">📋</span>
+      <!-- Upper Row: Room Code & Game Status -->
+      <div class="header-row header-row-status">
+        <div class="header-left">
+          <div class="room-code-badge" onclick="copyRoomCode()" title="Click to copy room code">
+            <span id="badge-room-label" class="badge-label">ROOM</span>
+            <span id="header-room-code" class="badge-code">------</span>
+            <span class="copy-icon">📋</span>
+          </div>
+          <button class="btn btn-sm btn-outline btn-share-link" onclick="copyInviteLink()" title="Copy Invite Link">
+            <span id="btn-share-link-text">🔗 Share</span>
+          </button>
         </div>
-        <button class="btn btn-sm btn-outline" onclick="copyInviteLink()">
-          <span id="btn-share-link-text">🔗 Share Link</span>
-        </button>
+
+        <div class="header-center">
+          <div id="hand-indicator" class="hand-indicator">Hand #1</div>
+          <div id="stage-indicator" class="stage-indicator">WAITING</div>
+        </div>
       </div>
 
-      <div class="header-center">
-        <div id="hand-indicator" class="hand-indicator">Hand #1</div>
-        <div id="stage-indicator" class="stage-indicator">WAITING</div>
-      </div>
-
-      <div class="header-right">
-        <button id="game-lang-btn" class="btn btn-sm btn-outline lang-toggle-btn" onclick="toggleLanguage()" title="Change Platform Language / تغيير لغة المنصة">
-          🌐 العربية
-        </button>
-        <button id="btn-open-rankings" class="btn btn-sm btn-outline" onclick="openHandRankingsModal()" title="View Poker Hand Rankings Chart">
-          🃏 Hand Rankings
-        </button>
-        <button id="btn-open-settings" class="btn btn-sm btn-outline" onclick="openSettingsModal()" title="Table Settings">
-          ⚙️ Settings
-        </button>
-        <button id="sound-btn" class="btn btn-sm btn-icon" onclick="toggleSound()" title="Toggle Sound">
-          🔊
-        </button>
-        <button id="btn-leave" class="btn btn-sm btn-danger" onclick="handleLeaveRoom()">
-          Leave
-        </button>
+      <!-- Lower Row: Tools & Navigation Buttons -->
+      <div class="header-row header-row-tools">
+        <div class="header-right">
+          <button id="game-lang-btn" class="btn btn-sm btn-outline lang-toggle-btn" onclick="toggleLanguage()" title="Change Platform Language / تغيير لغة المنصة">
+            🌐 العربية
+          </button>
+          <button id="btn-open-rankings" class="btn btn-sm btn-outline" onclick="openHandRankingsModal()" title="View Poker Hand Rankings Chart">
+            🃏 Rankings
+          </button>
+          <button id="btn-open-settings" class="btn btn-sm btn-outline" onclick="openSettingsModal()" title="Table Settings">
+            ⚙️ Settings
+          </button>
+          <button id="sound-btn" class="btn btn-sm btn-icon btn-outline" onclick="toggleSound()" title="Toggle Sound">
+            🔊
+          </button>
+          <button id="btn-leave" class="btn btn-sm btn-danger" onclick="handleLeaveRoom()">
+            Leave
+          </button>
+        </div>
       </div>
     </header>
 

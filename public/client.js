@@ -44,8 +44,8 @@ const TRANSLATIONS = {
     
     // Game Header
     room_label: "ROOM",
-    share_link_btn: "🔗 Share Link",
-    btn_rankings: "🃏 Hand Rankings",
+    share_link_btn: "🔗 Share",
+    btn_rankings: "🃏 Rankings",
     btn_settings: "⚙️ Settings",
     btn_leave: "Leave",
     hand_prefix: "Hand #",
@@ -156,8 +156,8 @@ const TRANSLATIONS = {
     
     // Game Header
     room_label: "الغرفة",
-    share_link_btn: "🔗 نسخ الرابط",
-    btn_rankings: "🃏 ترتيب الأيدي",
+    share_link_btn: "🔗 مشاركة",
+    btn_rankings: "🃏 الترتيب",
     btn_settings: "⚙️ الإعدادات",
     btn_leave: "خروج",
     hand_prefix: "اليد #",

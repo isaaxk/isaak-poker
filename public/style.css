@@ -340,7 +340,7 @@ input:focus, select:focus {
 .game-header {
   height: 52px;
   min-height: 52px;
-  background: rgba(20, 25, 35, 0.9);
+  background: rgba(20, 25, 35, 0.92);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border-color);
   display: flex;
@@ -350,7 +350,18 @@ input:focus, select:focus {
   z-index: 10;
 }
 
-.header-left, .header-right {
+.header-row {
+  display: flex;
+  align-items: center;
+}
+
+.header-row-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-left {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -389,6 +400,17 @@ input:focus, select:focus {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.header-row-tools {
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* =========================================
@@ -1458,30 +1480,76 @@ body.lang-ar .chat-input-form {
   .lobby-card { padding: 16px 14px; border-radius: 14px; }
   
   .game-header {
-    height: 48px;
-    min-height: 48px;
-    padding: 0 8px;
+    height: auto;
+    min-height: unset;
+    flex-direction: column;
+    padding: 4px 8px;
+    gap: 3px;
+    background: rgba(14, 18, 27, 0.96);
+  }
+  .header-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-row-status {
+    height: 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 2px;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .header-center {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-row-tools {
+    height: 30px;
+  }
+  .header-right {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 4px;
   }
-  .header-left, .header-center, .header-right {
-    gap: 4px;
+  .header-right .btn-sm {
+    flex: 1;
+    height: 28px;
+    padding: 2px 3px;
+    font-size: 0.72rem;
+    text-align: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+  .header-right #sound-btn {
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+  }
+  .header-right #btn-leave {
+    flex: 0 0 auto;
+    padding: 2px 7px;
+    height: 28px;
   }
   .room-code-badge {
-    padding: 3px 6px;
+    padding: 2px 6px;
     gap: 4px;
   }
   .badge-label { display: none; }
-  .badge-code { font-size: 0.8rem; }
-  .btn-sm {
-    padding: 4px 7px;
-    font-size: 0.74rem;
-  }
+  .badge-code { font-size: 0.78rem; }
   .hand-indicator { font-size: 0.72rem; }
   .stage-indicator { font-size: 0.65rem; padding: 2px 5px; }
 
   .table-container {
     padding: 4px 6px 8px 6px;
-    max-height: calc(100dvh - 48px - 76px);
+    max-height: calc(100dvh - 70px - 76px);
   }
   .poker-table-wrapper {
     aspect-ratio: 1.35 / 1;
@@ -1645,9 +1713,9 @@ body.lang-ar .chat-input-form {
   }
 
   .side-drawer {
-    top: 48px;
-    height: calc(100% - 48px - 76px);
-    height: calc(100dvh - 48px - 76px);
+    top: 68px;
+    height: calc(100% - 68px - 76px);
+    height: calc(100dvh - 68px - 76px);
   }
 
   .modal-overlay { padding: 8px; }
