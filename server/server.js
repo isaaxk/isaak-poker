@@ -288,7 +288,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // --- Rebuy (Creator / Host Only) ---
+  // --- Rebuy (Creator / Host or Bankrupt Player) ---
   socket.on('rebuy', (data) => {
     try {
       const session = socketToSession.get(socket.id);
@@ -297,23 +297,31 @@ io.on('connection', (socket) => {
       const roomData = rooms.get(session.roomCode);
       if (!roomData) return;
 
-      if (roomData.hostId !== session.playerId) {
-        return socket.emit('error_message', { message: 'Only the room creator / host can reload chips' });
-      }
-
       const reloadAmount = Number(data?.amount) || roomData.game.config.startingChips || 1000;
       const targetPlayerId = data?.targetPlayerId;
 
-      if (targetPlayerId === 'all') {
-        roomData.game.getSeatedPlayers().forEach(p => {
-          if (p.chips === 0) {
-            roomData.game.rebuy(p.id, reloadAmount);
-          }
-        });
-      } else if (targetPlayerId) {
-        roomData.game.rebuy(targetPlayerId, reloadAmount);
+      if (roomData.hostId === session.playerId) {
+        if (targetPlayerId === 'all') {
+          roomData.game.getSeatedPlayers().forEach(p => {
+            if (p.chips === 0) {
+              roomData.game.rebuy(p.id, reloadAmount);
+            }
+          });
+        } else if (targetPlayerId) {
+          roomData.game.rebuy(targetPlayerId, reloadAmount);
+        } else {
+          roomData.game.rebuy(session.playerId, reloadAmount);
+        }
       } else {
-        roomData.game.rebuy(session.playerId, reloadAmount);
+        // Player reloading their own bankrupt chips
+        const player = roomData.game.getPlayer(session.playerId);
+        if (player && player.chips === 0) {
+          roomData.game.rebuy(session.playerId, reloadAmount);
+        } else if (player && player.chips > 0) {
+          return socket.emit('error_message', { message: 'You still have chips!' });
+        } else {
+          return socket.emit('error_message', { message: 'Only the room creator can reload table chips' });
+        }
       }
     } catch (err) {
       console.error('Error in rebuy:', err);
@@ -371,30 +379,30 @@ io.on('connection', (socket) => {
   socket.on('leave_room', () => {
     try {
       const session = socketToSession.get(socket.id);
-      if (!session) return;
-
-      const roomData = rooms.get(session.roomCode);
-      if (roomData) {
-        roomData.game.removePlayer(session.playerId);
-        // If host left, transfer host role to next seated player
-        if (roomData.hostId === session.playerId) {
-          const seated = roomData.game.getSeatedPlayers();
-          if (seated.length > 0) {
-            roomData.hostId = seated[0].id;
-            roomData.game.log(`👑 ${seated[0].name} is now the table host.`);
+      if (session) {
+        const roomData = rooms.get(session.roomCode);
+        if (roomData) {
+          roomData.game.removePlayer(session.playerId);
+          if (roomData.hostId === session.playerId) {
+            const seated = roomData.game.getSeatedPlayers();
+            if (seated.length > 0) {
+              roomData.hostId = seated[0].id;
+              roomData.game.log(`👑 ${seated[0].name} is now the table host.`);
+            }
+          }
+          if (roomData.game.getSeatedPlayers().length === 0) {
+            rooms.delete(session.roomCode);
+          } else {
+            broadcastRoomState(session.roomCode);
           }
         }
-        // If room is empty, clean it up after a grace period
-        if (roomData.game.getSeatedPlayers().length === 0) {
-          rooms.delete(session.roomCode);
-        }
+        socket.leave(session.roomCode);
+        socketToSession.delete(socket.id);
       }
-
-      socket.leave(session.roomCode);
-      socketToSession.delete(socket.id);
       socket.emit('left_room');
     } catch (err) {
       console.error('Error in leave_room:', err);
+      socket.emit('left_room');
     }
   });
 

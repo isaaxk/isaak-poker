@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Texas Hold'em Poker - Multiplayer</title>
-  <link rel="stylesheet" href="style.css?v=2.4">
+  <link rel="stylesheet" href="style.css?v=2.5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -177,14 +177,14 @@
                 <div class="card-slot empty" id="slot-3"></div>
                 <div class="card-slot empty" id="slot-4"></div>
               </div>
+            </div>
 
-              <!-- Winner Banner -->
-              <div id="winner-banner" class="winner-banner hidden">
-                <div class="winner-trophy">🏆</div>
-                <div class="winner-text-group">
-                  <div id="winner-title" class="winner-title">Winner Name</div>
-                  <div id="winner-desc" class="winner-desc">Won $0 with Full House</div>
-                </div>
+            <!-- Winner Banner (Prominent Center Overlay directly on table felt) -->
+            <div id="winner-banner" class="winner-banner hidden">
+              <div class="winner-trophy">🏆</div>
+              <div class="winner-text-group">
+                <div id="winner-title" class="winner-title">Winner Name</div>
+                <div id="winner-desc" class="winner-desc">Won $0 with Full House</div>
               </div>
             </div>
 
@@ -452,12 +452,20 @@
           <button id="btn-save-settings" type="submit" class="btn btn-gold btn-block">
             Save Table Settings
           </button>
-        </form>
+  <!-- Dedicated Touch-Friendly Confirmation Modal (Works 100% reliably on all mobile devices) -->
+  <div id="confirm-modal" class="modal-overlay hidden" style="z-index: 3000;">
+    <div class="modal-card" style="max-width: 360px; text-align: center; padding: 24px 20px;">
+      <div id="confirm-icon" style="font-size: 2.2rem; margin-bottom: 10px;">⚠️</div>
+      <h3 id="confirm-title" style="color: var(--gold-primary); margin-bottom: 8px; font-size: 1.1rem;">تأكيد العملية</h3>
+      <p id="confirm-message" style="color: #e2e8f0; font-size: 0.92rem; line-height: 1.5; margin-bottom: 20px;">هل أنت متأكد؟</p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button id="confirm-btn-cancel" class="btn btn-outline" style="flex: 1; padding: 10px 14px; font-size: 0.9rem;" onclick="closeConfirmModal(false)">إلغاء</button>
+        <button id="confirm-btn-ok" class="btn btn-gold" style="flex: 1; padding: 10px 14px; font-size: 0.9rem;" onclick="closeConfirmModal(true)">تأكيد</button>
       </div>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="client.js?v=2.3"></script>
+  <script src="client.js?v=2.5"></script>
 </body>
 </html>

@@ -536,30 +536,30 @@ input:focus, select:focus {
   background: rgba(0, 0, 0, 0.2);
 }
 
-/* Winner Banner (Positioned above community cards and ALWAYS in front of all player seats/cards) */
+/* Winner Banner (Positioned prominently on table felt and ALWAYS in front of all player seats/cards) */
 .winner-banner {
   position: absolute;
-  top: -50px;
+  top: 22%;
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(26, 36, 56, 0.98) 100%);
   border: 2px solid var(--gold-primary);
   border-radius: 30px;
-  padding: 6px 20px;
+  padding: 8px 24px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95), 0 0 30px rgba(245, 179, 66, 0.7);
-  z-index: 1000;
-  white-space: nowrap;
+  gap: 12px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.95), 0 0 35px rgba(245, 179, 66, 0.8);
+  z-index: 2000;
+  max-width: 90%;
   animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   pointer-events: auto;
 }
 .winner-banner.hidden { display: none; }
-.winner-trophy { font-size: 1.4rem; }
+.winner-trophy { font-size: 1.5rem; }
 .winner-text-group { display: flex; flex-direction: column; align-items: center; text-align: center; }
-.winner-title { font-weight: 800; color: var(--gold-primary); font-size: 1rem; }
-.winner-desc { font-size: 0.82rem; color: #ffffff; font-weight: 600; }
+.winner-title { font-weight: 800; color: var(--gold-primary); font-size: 1.05rem; }
+.winner-desc { font-size: 0.85rem; color: #ffffff; font-weight: 600; }
 
 .host-rebuy-btn {
   background: rgba(16, 185, 129, 0.18);
@@ -1609,18 +1609,20 @@ body.lang-ar .chat-input-form {
   }
 
   .winner-banner {
-    top: -36px;
-    padding: 4px 14px;
-    gap: 6px;
-    border-radius: 20px;
-    z-index: 1000;
-    max-width: 92vw;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 16px;
+    gap: 8px;
+    border-radius: 24px;
+    z-index: 2000;
+    max-width: 92%;
     white-space: normal;
     text-align: center;
   }
-  .winner-trophy { font-size: 1.1rem; }
-  .winner-title { font-size: 0.85rem; }
-  .winner-desc { font-size: 0.72rem; }
+  .winner-trophy { font-size: 1.2rem; }
+  .winner-title { font-size: 0.92rem; }
+  .winner-desc { font-size: 0.76rem; }
 
   .seat-card {
     min-width: 72px;

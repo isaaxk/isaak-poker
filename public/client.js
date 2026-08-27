@@ -612,9 +612,43 @@ function closeHandRankingsModal() {
   document.getElementById('rankings-modal').classList.add('hidden');
 }
 
+let pendingConfirmCallback = null;
+
+function showConfirmDialog(options = {}) {
+  const modal = document.getElementById('confirm-modal');
+  const iconEl = document.getElementById('confirm-icon');
+  const titleEl = document.getElementById('confirm-title');
+  const msgEl = document.getElementById('confirm-message');
+  const cancelBtn = document.getElementById('confirm-btn-cancel');
+  const okBtn = document.getElementById('confirm-btn-ok');
+
+  if (iconEl) iconEl.textContent = options.icon || '⚠️';
+  if (titleEl) titleEl.textContent = options.title || (currentLang === 'ar' ? 'تأكيد العملية' : 'Confirm Action');
+  if (msgEl) msgEl.textContent = options.message || (currentLang === 'ar' ? 'هل أنت متأكد؟' : 'Are you sure?');
+  if (cancelBtn) cancelBtn.textContent = options.cancelText || (currentLang === 'ar' ? 'إلغاء' : 'Cancel');
+  if (okBtn) {
+    okBtn.textContent = options.okText || (currentLang === 'ar' ? 'تأكيد' : 'Confirm');
+    okBtn.className = options.isDanger ? 'btn btn-danger' : 'btn btn-gold';
+  }
+
+  pendingConfirmCallback = options.onConfirm || null;
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeConfirmModal(confirmed) {
+  const modal = document.getElementById('confirm-modal');
+  if (modal) modal.classList.add('hidden');
+  if (confirmed && typeof pendingConfirmCallback === 'function') {
+    pendingConfirmCallback();
+  }
+  pendingConfirmCallback = null;
+}
+
 function closeModalOnBackdrop(e) {
   if (e.target.id === 'rankings-modal') {
     closeHandRankingsModal();
+  } else if (e.target.id === 'confirm-modal') {
+    closeConfirmModal(false);
   }
 }
 
@@ -1370,25 +1404,38 @@ function handleStartGame() {
 }
 
 function handleHostRebuyPlayer(playerId) {
-  if (!isHost) return;
   const amount = lastGameState?.config?.startingChips || 1000;
   const targetPlayer = lastGameState?.seats?.find(s => s && s.id === playerId);
   const name = targetPlayer ? targetPlayer.name : (currentLang === 'ar' ? 'هذا اللاعب' : 'this player');
-  if (!confirm(t('confirm_reload_player', { amount: amount.toLocaleString(), name }))) {
-    return;
-  }
-  socket.emit('rebuy', { targetPlayerId: playerId, amount });
-  showToast(t('toast_reloaded_player', { amount: amount.toLocaleString(), name }), 'success');
+
+  showConfirmDialog({
+    icon: '💰',
+    title: currentLang === 'ar' ? `شحن فيشات ${name}` : `Reload Chips for ${name}`,
+    message: t('confirm_reload_player', { amount: amount.toLocaleString(), name }),
+    okText: currentLang === 'ar' ? 'شحن الآن' : 'Reload',
+    cancelText: currentLang === 'ar' ? 'إلغاء' : 'Cancel',
+    isDanger: false,
+    onConfirm: () => {
+      socket.emit('rebuy', { targetPlayerId: playerId, amount });
+      showToast(t('toast_reloaded_player', { amount: amount.toLocaleString(), name }), 'success');
+    }
+  });
 }
 
 function handleRebuy() {
-  if (!isHost) return;
   const amount = lastGameState?.config?.startingChips || 1000;
-  if (!confirm(t('confirm_reload_table', { amount: amount.toLocaleString() }))) {
-    return;
-  }
-  socket.emit('rebuy', { targetPlayerId: 'all', amount });
-  showToast(t('toast_reloaded_table', { amount: amount.toLocaleString() }), 'success');
+  showConfirmDialog({
+    icon: '💰',
+    title: currentLang === 'ar' ? 'شحن فيشات الطاولة' : 'Reload Chips',
+    message: t('confirm_reload_table', { amount: amount.toLocaleString() }),
+    okText: currentLang === 'ar' ? 'شحن الآن' : 'Reload',
+    cancelText: currentLang === 'ar' ? 'إلغاء' : 'Cancel',
+    isDanger: false,
+    onConfirm: () => {
+      socket.emit('rebuy', { targetPlayerId: isHost ? 'all' : myPlayerId, amount });
+      showToast(t('toast_reloaded_table', { amount: amount.toLocaleString() }), 'success');
+    }
+  });
 }
 
 function sitAtSeat(seatIndex) {
@@ -1402,9 +1449,21 @@ function sitAtSeat(seatIndex) {
 }
 
 function handleLeaveRoom() {
-  if (confirm(t('confirm_leave'))) {
-    socket.emit('leave_room');
-  }
+  showConfirmDialog({
+    icon: '🚪',
+    title: currentLang === 'ar' ? 'مغادرة الطاولة' : 'Leave Table',
+    message: t('confirm_leave'),
+    okText: currentLang === 'ar' ? 'نعم، مغادرة' : 'Leave',
+    cancelText: currentLang === 'ar' ? 'البقاء' : 'Stay',
+    isDanger: true,
+    onConfirm: () => {
+      sessionStorage.removeItem('poker_room');
+      currentRoomCode = null;
+      socket.emit('leave_room');
+      switchToLobbyView();
+      showToast(currentLang === 'ar' ? 'تمت مغادرة الطاولة' : 'Left the table', 'info');
+    }
+  });
 }
 
 // ==========================================
