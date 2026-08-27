@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Texas Hold'em Poker - Multiplayer</title>
-  <link rel="stylesheet" href="style.css?v=2.0">
+  <link rel="stylesheet" href="style.css?v=2.1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -61,22 +61,22 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label id="lbl-starting-chips" for="starting-chips">Starting Chips ($)</label>
-              <input type="number" id="starting-chips" min="10" max="1000000" step="50" value="1000" placeholder="e.g. 1000">
+              <label id="lbl-max-seats" for="max-seats">Max Players (2 - 20)</label>
+              <input type="number" id="max-seats" min="2" max="20" step="1" value="6" placeholder="2 to 20" oninput="onMaxPlayersChange(this.value)">
             </div>
             <div class="form-group">
-              <label id="lbl-max-seats" for="max-seats">Max Players (2 - 20)</label>
-              <input type="number" id="max-seats" min="2" max="20" step="1" value="6" placeholder="2 to 20">
+              <label id="lbl-starting-chips" for="starting-chips">Starting Chips ($)</label>
+              <input type="number" id="starting-chips" min="10" max="1000000" step="50" value="2000" placeholder="e.g. 2000">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label id="lbl-small-blind" for="small-blind">Small Blind ($)</label>
-              <input type="number" id="small-blind" min="1" max="50000" step="5" value="10" placeholder="e.g. 10">
+              <label id="lbl-big-blind" for="big-blind">Big Blind ($)</label>
+              <input type="number" id="big-blind" min="2" max="100000" step="2" value="40" placeholder="e.g. 40" oninput="onBigBlindChange(this.value)">
             </div>
             <div class="form-group">
-              <label id="lbl-big-blind" for="big-blind">Big Blind ($)</label>
-              <input type="number" id="big-blind" min="2" max="100000" step="10" value="20" placeholder="e.g. 20">
+              <label id="lbl-small-blind" for="small-blind">Small Blind ($ - Auto Half)</label>
+              <input type="number" id="small-blind" readonly style="opacity:0.85; background:rgba(0,0,0,0.3); cursor:not-allowed;" value="20" placeholder="Auto half">
             </div>
           </div>
           <div class="form-group">
@@ -413,29 +413,29 @@
         <form id="settings-form" onsubmit="handleSaveSettings(event)" style="display:flex; flex-direction:column; gap:16px;">
           <div class="form-row">
             <div class="form-group">
-              <label id="lbl-setting-turn-timer" for="setting-turn-timer">Turn Time (Seconds, 0 = Unlimited)</label>
-              <input type="number" id="setting-turn-timer" min="0" max="300" step="5" placeholder="e.g. 30">
+              <label id="lbl-setting-max-seats" for="setting-max-seats">Max Players (2 - 20)</label>
+              <input type="number" id="setting-max-seats" min="2" max="20" step="1" placeholder="2 to 20" oninput="onSettingMaxPlayersChange(this.value)">
             </div>
             <div class="form-group">
-              <label id="lbl-setting-max-seats" for="setting-max-seats">Max Players (2 - 20)</label>
-              <input type="number" id="setting-max-seats" min="2" max="20" step="1" placeholder="2 to 20">
+              <label id="lbl-setting-starting-chips" for="setting-starting-chips">Starting / Reload Chips ($)</label>
+              <input type="number" id="setting-starting-chips" min="10" max="1000000" step="50" placeholder="e.g. 2000">
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label id="lbl-setting-small-blind" for="setting-small-blind">Small Blind ($)</label>
-              <input type="number" id="setting-small-blind" min="1" max="50000" step="5" placeholder="e.g. 10">
+              <label id="lbl-setting-big-blind" for="setting-big-blind">Big Blind ($)</label>
+              <input type="number" id="setting-big-blind" min="2" max="100000" step="2" placeholder="e.g. 40" oninput="onSettingBigBlindChange(this.value)">
             </div>
             <div class="form-group">
-              <label id="lbl-setting-big-blind" for="setting-big-blind">Big Blind ($)</label>
-              <input type="number" id="setting-big-blind" min="2" max="100000" step="10" placeholder="e.g. 20">
+              <label id="lbl-setting-small-blind" for="setting-small-blind">Small Blind ($ - Auto Half)</label>
+              <input type="number" id="setting-small-blind" readonly style="opacity:0.85; background:rgba(0,0,0,0.3); cursor:not-allowed;" placeholder="Auto half">
             </div>
           </div>
 
           <div class="form-group">
-            <label id="lbl-setting-starting-chips" for="setting-starting-chips">Starting / Reload Chips ($)</label>
-            <input type="number" id="setting-starting-chips" min="10" max="1000000" step="50" placeholder="e.g. 1000">
+            <label id="lbl-setting-turn-timer" for="setting-turn-timer">Turn Time (Seconds, 0 = Unlimited)</label>
+            <input type="number" id="setting-turn-timer" min="0" max="300" step="5" placeholder="e.g. 30">
           </div>
 
           <div class="form-group checkbox-group">
@@ -458,6 +458,6 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="client.js?v=2.0"></script>
+  <script src="client.js?v=2.1"></script>
 </body>
 </html>

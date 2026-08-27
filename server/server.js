@@ -68,8 +68,10 @@ io.on('connection', (socket) => {
       const roomCode = generateRoomCode();
       const playerId = data.playerId || crypto.randomUUID();
 
-      const smallBlind = Math.max(1, Number(data.smallBlind) || 10);
-      const bigBlind = Math.max(smallBlind, Number(data.bigBlind) || (smallBlind * 2));
+      const bigBlind = Math.max(2, Number(data.bigBlind) || 20);
+      const smallBlind = data.smallBlind !== undefined
+        ? Math.max(1, Number(data.smallBlind))
+        : Math.max(1, Math.floor(bigBlind / 2));
       const startingChips = Math.max(10, Number(data.startingChips) || 1000);
       const maxSeats = Math.min(Math.max(Number(data.maxSeats) || 8, 2), 20);
       const turnTimeoutMs = data.turnTimeoutSeconds !== undefined
@@ -141,11 +143,13 @@ io.on('connection', (socket) => {
       if (data.maxSeats !== undefined) {
         newConfig.maxSeats = Math.min(Math.max(Number(data.maxSeats), 2), 20);
       }
-      if (data.smallBlind !== undefined) {
-        newConfig.smallBlind = Math.max(1, Number(data.smallBlind));
-      }
       if (data.bigBlind !== undefined) {
-        newConfig.bigBlind = Math.max(newConfig.smallBlind || 1, Number(data.bigBlind));
+        newConfig.bigBlind = Math.max(2, Number(data.bigBlind));
+        newConfig.smallBlind = data.smallBlind !== undefined
+          ? Math.max(1, Number(data.smallBlind))
+          : Math.max(1, Math.floor(newConfig.bigBlind / 2));
+      } else if (data.smallBlind !== undefined) {
+        newConfig.smallBlind = Math.max(1, Number(data.smallBlind));
       }
       if (data.startingChips !== undefined) {
         newConfig.startingChips = Math.max(10, Number(data.startingChips));

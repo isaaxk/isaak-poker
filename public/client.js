@@ -35,7 +35,7 @@ const TRANSLATIONS = {
     create_name_placeholder: "Enter your nickname",
     starting_chips_label: "Starting Chips ($)",
     max_seats_label: "Max Players (2 - 20)",
-    small_blind_label: "Small Blind ($)",
+    small_blind_label: "Small Blind ($ - Auto Half)",
     big_blind_label: "Big Blind ($)",
     turn_timer_label: "Turn Timer (Seconds, 0 = Unlimited)",
     hand_helper_label: "Show Hand Name Helper (e.g. Two Pair, Flush)",
@@ -102,7 +102,7 @@ const TRANSLATIONS = {
     settings_title: "⚙️ Table & Game Settings",
     settings_turn_time: "Turn Time (Seconds, 0 = Unlimited)",
     settings_max_players: "Max Players (2 - 20)",
-    settings_sb: "Small Blind ($)",
+    settings_sb: "Small Blind ($ - Auto Half)",
     settings_bb: "Big Blind ($)",
     settings_chips: "Starting / Reload Chips ($)",
     settings_helper: "Tell player the name of their hand (e.g. Flush, Full House)",
@@ -145,9 +145,9 @@ const TRANSLATIONS = {
     btn_join_table: "دخول الطاولة",
     create_name_label: "اسمك في اللعبة",
     create_name_placeholder: "أدخل اسمك أو لقبك",
-    starting_chips_label: "الفيشات الابتدائية ($)",
-    max_seats_label: "أقصى عدد لاعبين (2 - 20)",
-    small_blind_label: "السمول بلايند ($)",
+    starting_chips_label: "فيشات البدء ($)",
+    max_seats_label: "عدد اللاعبين (2 - 20)",
+    small_blind_label: "السمول بلايند ($ - تلقائياً النصف)",
     big_blind_label: "البيغ بلايند ($)",
     turn_timer_label: "وقت التفكير للدور (بالثواني، 0 = بدون وقت)",
     hand_helper_label: "إظهار اسم ومستوى اليد (مثال: Two Pair, Flush)",
@@ -213,8 +213,8 @@ const TRANSLATIONS = {
     // Settings Modal
     settings_title: "⚙️ إعدادات الطاولة واللعبة",
     settings_turn_time: "وقت التفكير للدور (بالثواني، 0 = غير محدود)",
-    settings_max_players: "الحد الأقصى للاعبين (2 - 20)",
-    settings_sb: "السمول بلايند ($)",
+    settings_max_players: "عدد اللاعبين (2 - 20)",
+    settings_sb: "السمول بلايند ($ - تلقائياً النصف)",
     settings_bb: "البيغ بلايند ($)",
     settings_chips: "فيشات البدء / إعادة الشحن ($)",
     settings_helper: "إخبار اللاعب باسم تركيبة يده (مثال: فل هاوس، فلاش)",
@@ -645,15 +645,69 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// Smart Poker Suggestions based on Player Count
+function getPokerSuggestions(playerCount) {
+  const count = Math.min(Math.max(Number(playerCount) || 6, 2), 20);
+  if (count <= 2) {
+    return { startingChips: 1000, bigBlind: 20, smallBlind: 10 };
+  } else if (count <= 5) {
+    return { startingChips: 1500, bigBlind: 30, smallBlind: 15 };
+  } else if (count <= 8) {
+    return { startingChips: 2000, bigBlind: 40, smallBlind: 20 };
+  } else if (count <= 12) {
+    return { startingChips: 3000, bigBlind: 60, smallBlind: 30 };
+  } else {
+    return { startingChips: 5000, bigBlind: 100, smallBlind: 50 };
+  }
+}
+
+function onMaxPlayersChange(players) {
+  const suggestions = getPokerSuggestions(players);
+  const startingChipsInput = document.getElementById('starting-chips');
+  const bigBlindInput = document.getElementById('big-blind');
+  const smallBlindInput = document.getElementById('small-blind');
+
+  if (startingChipsInput) startingChipsInput.value = suggestions.startingChips;
+  if (bigBlindInput) bigBlindInput.value = suggestions.bigBlind;
+  if (smallBlindInput) smallBlindInput.value = suggestions.smallBlind;
+}
+
+function onBigBlindChange(bbValue) {
+  const bb = Math.max(2, Number(bbValue) || 2);
+  const sb = Math.max(1, Math.floor(bb / 2));
+  const smallBlindInput = document.getElementById('small-blind');
+  if (smallBlindInput) smallBlindInput.value = sb;
+}
+
+function onSettingMaxPlayersChange(players) {
+  const suggestions = getPokerSuggestions(players);
+  const startingChipsInput = document.getElementById('setting-starting-chips');
+  const bigBlindInput = document.getElementById('setting-big-blind');
+  const smallBlindInput = document.getElementById('setting-small-blind');
+
+  if (startingChipsInput) startingChipsInput.value = suggestions.startingChips;
+  if (bigBlindInput) bigBlindInput.value = suggestions.bigBlind;
+  if (smallBlindInput) smallBlindInput.value = suggestions.smallBlind;
+}
+
+function onSettingBigBlindChange(bbValue) {
+  const bb = Math.max(2, Number(bbValue) || 2);
+  const sb = Math.max(1, Math.floor(bb / 2));
+  const smallBlindInput = document.getElementById('setting-small-blind');
+  if (smallBlindInput) smallBlindInput.value = sb;
+}
+
 // In-Game Settings Modal Functions
 function openSettingsModal() {
   if (lastGameState && lastGameState.config) {
     const cfg = lastGameState.config;
     const seconds = cfg.turnTimeoutMs !== undefined ? Math.floor(cfg.turnTimeoutMs / 1000) : 30;
+    const bb = cfg.bigBlind || 20;
+    const sb = cfg.smallBlind || Math.max(1, Math.floor(bb / 2));
     document.getElementById('setting-turn-timer').value = seconds;
     document.getElementById('setting-max-seats').value = cfg.maxSeats || 8;
-    document.getElementById('setting-small-blind').value = cfg.smallBlind || 10;
-    document.getElementById('setting-big-blind').value = cfg.bigBlind || 20;
+    document.getElementById('setting-big-blind').value = bb;
+    document.getElementById('setting-small-blind').value = sb;
     document.getElementById('setting-starting-chips').value = cfg.startingChips || 1000;
     document.getElementById('setting-hand-helper').checked = cfg.showHandHelper !== false;
   }
@@ -665,7 +719,7 @@ function openSettingsModal() {
     saveBtn.style.display = 'block';
     hostNotice.textContent = t('settings_host_notice');
     hostNotice.style.color = 'var(--gold-light)';
-    document.querySelectorAll('#settings-form select, #settings-form input').forEach(el => el.disabled = false);
+    document.querySelectorAll('#settings-form select, #settings-form input:not(#setting-small-blind)').forEach(el => el.disabled = false);
   } else {
     saveBtn.style.display = 'none';
     hostNotice.textContent = t('settings_guest_notice');
@@ -692,8 +746,8 @@ function handleSaveSettings(e) {
 
   const turnSeconds = Number(document.getElementById('setting-turn-timer').value);
   const maxSeats = Math.min(Math.max(Number(document.getElementById('setting-max-seats').value) || 8, 2), 20);
-  const smallBlind = Math.max(1, Number(document.getElementById('setting-small-blind').value) || 10);
-  const bigBlind = Math.max(smallBlind, Number(document.getElementById('setting-big-blind').value) || (smallBlind * 2));
+  const bigBlind = Math.max(2, Number(document.getElementById('setting-big-blind').value) || 20);
+  const smallBlind = Math.max(1, Math.floor(bigBlind / 2));
   const startingChips = Math.max(10, Number(document.getElementById('setting-starting-chips').value) || 1000);
   const showHandHelper = document.getElementById('setting-hand-helper').checked;
 
@@ -732,10 +786,10 @@ function switchLobbyTab(tab) {
 function handleCreateRoom() {
   const nameInput = document.getElementById('create-name').value.trim();
   const name = nameInput || 'Host';
-  const startingChips = Math.max(10, Number(document.getElementById('starting-chips').value) || 1000);
-  const smallBlind = Math.max(1, Number(document.getElementById('small-blind').value) || 10);
-  const bigBlind = Math.max(smallBlind, Number(document.getElementById('big-blind').value) || (smallBlind * 2));
   const maxSeats = Math.min(Math.max(Number(document.getElementById('max-seats').value) || 6, 2), 20);
+  const startingChips = Math.max(10, Number(document.getElementById('starting-chips').value) || 1000);
+  const bigBlind = Math.max(2, Number(document.getElementById('big-blind').value) || 20);
+  const smallBlind = Math.max(1, Math.floor(bigBlind / 2));
   const turnSeconds = Number(document.getElementById('turn-timer').value);
   const showHandHelper = document.getElementById('show-hand-helper').checked;
 
