@@ -416,15 +416,21 @@ io.on('connection', (socket) => {
 });
 
 function startServer(port) {
-  server.listen(port, () => {
-    console.log(`\n♠♥♦♣ Texas Hold'em Poker Server running on http://localhost:${port}\n`);
-  }).on('error', (err) => {
+  const onError = (err) => {
     if (err.code === 'EADDRINUSE') {
-      console.log(`Port ${port} is currently busy (e.g. by Docker/WSL), trying port ${port + 1}...`);
-      startServer(port + 1);
+      console.log(`Port ${port} is currently busy, trying port ${port + 1}...`);
+      server.close();
+      setTimeout(() => startServer(port + 1), 50);
     } else {
       console.error('Server error:', err);
     }
+  };
+
+  server.once('error', onError);
+
+  server.listen(port, () => {
+    server.removeListener('error', onError);
+    console.log(`\n♠♥♦♣ Texas Hold'em Poker Server running on http://localhost:${port}\n`);
   });
 }
 
