@@ -536,30 +536,81 @@ input:focus, select:focus {
   background: rgba(0, 0, 0, 0.2);
 }
 
-/* Winner Banner (Prominently Centered on table felt and ALWAYS in front of all player seats/cards) */
+/* Winner Banner (Positioned above community cards so it NEVER blocks the 5 cards) */
 .winner-banner {
   position: absolute;
-  top: 50%;
+  top: 18%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(26, 36, 56, 0.98) 100%);
-  border: 2px solid var(--gold-primary);
-  border-radius: 28px;
-  padding: 10px 24px;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(26, 36, 56, 0.96) 100%);
+  border: 1.5px solid var(--gold-primary);
+  border-radius: 24px;
+  padding: 6px 14px 6px 18px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.95), 0 0 40px rgba(245, 179, 66, 0.85);
-  z-index: 2000;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 25px rgba(245, 179, 66, 0.5);
+  z-index: 500;
   max-width: 90%;
-  animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   pointer-events: auto;
 }
 .winner-banner.hidden { display: none !important; }
-.winner-trophy { font-size: 1.6rem; }
+.winner-trophy { font-size: 1.3rem; }
 .winner-text-group { display: flex; flex-direction: column; align-items: center; text-align: center; }
-.winner-title { font-weight: 800; color: var(--gold-primary); font-size: 1.1rem; }
-.winner-desc { font-size: 0.88rem; color: #ffffff; font-weight: 600; }
+.winner-title { font-weight: 800; color: var(--gold-primary); font-size: 0.96rem; line-height: 1.2; }
+.winner-desc { font-size: 0.8rem; color: #ffffff; font-weight: 600; }
+
+.winner-toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 6px;
+  transition: all 0.15s ease;
+}
+.winner-toggle-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #fff;
+  border-color: var(--accent-red);
+}
+
+/* Floating Mini Pill Button to Re-Show Winner */
+.winner-pill-btn {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.92);
+  border: 1.5px solid var(--gold-primary);
+  color: var(--gold-primary);
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  z-index: 500;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8), 0 0 15px rgba(245, 179, 66, 0.35);
+  animation: popIn 0.25s ease;
+  transition: all 0.2s ease;
+}
+.winner-pill-btn:hover {
+  background: var(--gold-primary);
+  color: #000;
+  transform: translateX(-50%) scale(1.05);
+}
+.winner-pill-btn.hidden { display: none !important; }
 
 .host-rebuy-btn {
   background: rgba(16, 185, 129, 0.18);
@@ -1609,20 +1660,26 @@ body.lang-ar .chat-input-form {
   }
 
   .winner-banner {
-    top: 50%;
+    top: 17%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 8px 18px;
-    gap: 8px;
-    border-radius: 24px;
-    z-index: 2000;
-    max-width: 92%;
+    transform: translateX(-50%);
+    padding: 5px 12px 5px 14px;
+    gap: 6px;
+    border-radius: 20px;
+    z-index: 500;
+    max-width: 94%;
     white-space: normal;
     text-align: center;
   }
-  .winner-trophy { font-size: 1.3rem; }
-  .winner-title { font-size: 0.95rem; }
-  .winner-desc { font-size: 0.78rem; }
+  .winner-trophy { font-size: 1.1rem; }
+  .winner-title { font-size: 0.84rem; }
+  .winner-desc { font-size: 0.72rem; }
+
+  .winner-pill-btn {
+    top: 17%;
+    padding: 3px 10px;
+    font-size: 0.72rem;
+  }
 
   .seat-card {
     min-width: 72px;

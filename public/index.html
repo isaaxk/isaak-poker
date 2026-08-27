@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Texas Hold'em Poker - Multiplayer</title>
-  <link rel="stylesheet" href="style.css?v=2.9">
+  <link rel="stylesheet" href="style.css?v=3.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -179,14 +179,21 @@
               </div>
             </div>
 
-            <!-- Winner Banner (Prominent Center Overlay directly on table felt) -->
+            <!-- Winner Banner (Positioned above community cards so it NEVER hides the 5 cards) -->
             <div id="winner-banner" class="winner-banner hidden">
               <div class="winner-trophy">🏆</div>
               <div class="winner-text-group">
                 <div id="winner-title" class="winner-title">Winner Name</div>
                 <div id="winner-desc" class="winner-desc">Won $0 with Full House</div>
               </div>
+              <button class="winner-toggle-btn" onclick="toggleWinnerBanner(false)" title="Hide Winner Banner / إخفاء">✕</button>
             </div>
+
+            <!-- Mini Floating Show Winner Pill (Appears when winner banner is minimized) -->
+            <button id="winner-pill-btn" class="winner-pill-btn hidden" onclick="toggleWinnerBanner(true)" title="Show Winner Details / إظهار الفائز">
+              <span class="winner-pill-icon">🏆</span>
+              <span id="winner-pill-label">Show Winner</span>
+            </button>
 
             <!-- 8 Player Seats Positioned Around Table -->
             <div class="seats-container" id="seats-container">
@@ -471,6 +478,6 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="client.js?v=2.9"></script>
+  <script src="client.js?v=3.0"></script>
 </body>
 </html>
