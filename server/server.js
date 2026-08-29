@@ -328,6 +328,55 @@ io.on('connection', (socket) => {
     }
   });
 
+  // --- Kick Player (Host only) ---
+  socket.on('kick_player', (data) => {
+    try {
+      const session = socketToSession.get(socket.id);
+      if (!session) return;
+
+      const roomData = rooms.get(session.roomCode);
+      if (!roomData) return;
+
+      if (roomData.hostId !== session.playerId) {
+        return socket.emit('error_message', { message: 'Only the room creator can kick players' });
+      }
+
+      const targetPlayerId = data?.targetPlayerId;
+      if (!targetPlayerId || targetPlayerId === session.playerId) {
+        return socket.emit('error_message', { message: 'Invalid kick target' });
+      }
+
+      const targetPlayer = roomData.game.getPlayer(targetPlayerId);
+      if (!targetPlayer) {
+        return socket.emit('error_message', { message: 'Player not found' });
+      }
+
+      const targetName = targetPlayer.name;
+      const targetSocketId = targetPlayer.socketId;
+
+      roomData.game.removePlayer(targetPlayerId);
+      roomData.game.log(`🚪 ${targetName} was removed from the table by the host.`);
+
+      // Notify and disconnect the kicked player's socket, if still connected
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('kicked', { message: 'You were removed from the room by the host.' });
+        const targetSocket = io.sockets.sockets.get(targetSocketId);
+        if (targetSocket) {
+          targetSocket.leave(session.roomCode);
+          socketToSession.delete(targetSocketId);
+        }
+      }
+
+      if (roomData.game.getSeatedPlayers().length === 0) {
+        rooms.delete(session.roomCode);
+      } else {
+        broadcastRoomState(session.roomCode);
+      }
+    } catch (err) {
+      console.error('Error in kick_player:', err);
+    }
+  });
+
   // --- Chat Message ---
   socket.on('send_chat', (data) => {
     try {
