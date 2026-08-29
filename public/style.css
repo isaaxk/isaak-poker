@@ -629,6 +629,24 @@ input:focus, select:focus {
   color: #000;
 }
 
+.host-kick-btn {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  font-size: 0.62rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 1px 5px;
+  cursor: pointer;
+  margin-top: 2px;
+  margin-left: 4px;
+  transition: all 0.2s;
+}
+.host-kick-btn:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
 .btn-reload-table-small {
   padding: 4px 10px !important;
   font-size: 0.72rem !important;
