@@ -67,6 +67,7 @@ const TRANSLATIONS = {
     all_in: "All-In",
     away: "Away",
     reload_player_btn: "+ 💰 Reload",
+    kick_player_btn: "✕ Kick",
     
     // Actions
     btn_fold: "FOLD",
@@ -126,6 +127,9 @@ const TRANSLATIONS = {
     confirm_reload_player: "Are you sure you want to reload ${amount} chips for {name}?",
     toast_reloaded_table: "Reloaded ${amount} chips for table!",
     toast_reloaded_player: "Reloaded ${amount} chips for {name}!",
+    confirm_kick_player: "Are you sure you want to kick {name} from the table?",
+    toast_kicked_player: "{name} was kicked from the table.",
+    toast_you_were_kicked: "You were removed from the room by the host.",
     toast_copied_code: "Copied room code: {code}",
     toast_copied_link: "Invite link copied to clipboard!",
     toast_sound_on: "Sound Unmuted",
@@ -179,6 +183,7 @@ const TRANSLATIONS = {
     all_in: "أول إن (All-In)",
     away: "غير متصل",
     reload_player_btn: "+ 💰 شحن",
+    kick_player_btn: "✕ طرد",
     
     // Actions
     btn_fold: "انسحاب (FOLD)",
@@ -238,6 +243,9 @@ const TRANSLATIONS = {
     confirm_reload_player: "هل أنت متأكد من رغبتك في شحن {amount}$ للاعب {name}؟",
     toast_reloaded_table: "تم شحن {amount}$ لجميع اللاعبين على الطاولة!",
     toast_reloaded_player: "تم شحن {amount}$ للاعب {name}!",
+    confirm_kick_player: "هل أنت متأكد من رغبتك في طرد {name} من الطاولة؟",
+    toast_kicked_player: "تم طرد {name} من الطاولة.",
+    toast_you_were_kicked: "تمت إزالتك من الغرفة من قبل المضيف.",
     toast_copied_code: "تم نسخ رمز الغرفة: {code}",
     toast_copied_link: "تم نسخ رابط الدعوة إلى الحافظة!",
     toast_sound_on: "تم تفعيل الصوت",
@@ -938,6 +946,11 @@ socket.on('settings_updated', (data) => {
   showToast(data.message || (currentLang === 'ar' ? 'تم تحديث إعدادات الطاولة!' : 'Table settings updated!'), 'success');
 });
 
+socket.on('kicked', (data) => {
+  switchToLobbyView();
+  showToast(data.message || t('toast_you_were_kicked'), 'error');
+});
+
 socket.on('left_room', () => {
   sessionStorage.removeItem('poker_room');
   currentRoomCode = null;
@@ -1163,6 +1176,12 @@ function renderSeats(state) {
         hostRebuyHtml = `<button class="host-rebuy-btn" onclick="handleHostRebuyPlayer('${player.id}')" title="Reload chips for ${escapeHtml(player.name)}">${t('reload_player_btn')}</button>`;
       }
 
+      // Creator Kick Button (not shown for self)
+      let hostKickHtml = '';
+      if (isHost && !isSelf) {
+        hostKickHtml = `<button class="host-kick-btn" onclick="handleHostKickPlayer('${player.id}')" title="Kick ${escapeHtml(player.name)}">${t('kick_player_btn')}</button>`;
+      }
+
       const youSuffix = isSelf ? (currentLang === 'ar' ? ' (أنت)' : ' (You)') : '';
 
       seatWrapper.innerHTML = `
@@ -1172,6 +1191,7 @@ function renderSeats(state) {
           <span class="seat-chips">$${player.chips.toLocaleString()}</span>
           ${actionTagHtml}
           ${hostRebuyHtml}
+          ${hostKickHtml}
         </div>
         ${holeCardsHtml}
         ${betPillHtml}
@@ -1509,6 +1529,24 @@ function handleHostRebuyPlayer(playerId) {
     onConfirm: () => {
       socket.emit('rebuy', { targetPlayerId: playerId, amount });
       showToast(t('toast_reloaded_player', { amount: amount.toLocaleString(), name }), 'success');
+    }
+  });
+}
+
+function handleHostKickPlayer(playerId) {
+  const targetPlayer = lastGameState?.seats?.find(s => s && s.id === playerId);
+  const name = targetPlayer ? targetPlayer.name : (currentLang === 'ar' ? 'هذا اللاعب' : 'this player');
+
+  showConfirmDialog({
+    icon: '🚪',
+    title: currentLang === 'ar' ? `طرد ${name}` : `Kick ${name}`,
+    message: t('confirm_kick_player', { name }),
+    okText: currentLang === 'ar' ? 'طرد' : 'Kick',
+    cancelText: currentLang === 'ar' ? 'إلغاء' : 'Cancel',
+    isDanger: true,
+    onConfirm: () => {
+      socket.emit('kick_player', { targetPlayerId: playerId });
+      showToast(t('toast_kicked_player', { name }), 'success');
     }
   });
 }
