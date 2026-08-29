@@ -647,6 +647,24 @@ input:focus, select:focus {
   color: #fff;
 }
 
+.host-edit-chips-btn {
+  background: rgba(96, 165, 250, 0.18);
+  border: 1px solid #60a5fa;
+  color: #93c5fd;
+  font-size: 0.62rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 1px 5px;
+  cursor: pointer;
+  margin-top: 2px;
+  margin-left: 4px;
+  transition: all 0.2s;
+}
+.host-edit-chips-btn:hover {
+  background: #60a5fa;
+  color: #000;
+}
+
 .btn-reload-table-small {
   padding: 4px 10px !important;
   font-size: 0.72rem !important;
