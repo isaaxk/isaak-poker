@@ -328,6 +328,40 @@ io.on('connection', (socket) => {
     }
   });
 
+  // --- Edit Player Chips (Host only) ---
+  socket.on('edit_player_chips', (data) => {
+    try {
+      const session = socketToSession.get(socket.id);
+      if (!session) return;
+
+      const roomData = rooms.get(session.roomCode);
+      if (!roomData) return;
+
+      if (roomData.hostId !== session.playerId) {
+        return socket.emit('error_message', { message: 'Only the room creator can edit player chips' });
+      }
+
+      const targetPlayerId = data?.targetPlayerId;
+      const newAmount = Number(data?.amount);
+
+      if (!targetPlayerId || !Number.isFinite(newAmount) || newAmount < 0) {
+        return socket.emit('error_message', { message: 'Invalid chip amount' });
+      }
+
+      const MAX_CHIPS = 1000000000;
+      const clampedAmount = Math.min(newAmount, MAX_CHIPS);
+
+      const success = roomData.game.setPlayerChips(targetPlayerId, clampedAmount);
+      if (!success) {
+        return socket.emit('error_message', { message: 'Player not found' });
+      }
+
+      broadcastRoomState(session.roomCode);
+    } catch (err) {
+      console.error('Error in edit_player_chips:', err);
+    }
+  });
+
   // --- Kick Player (Host only) ---
   socket.on('kick_player', (data) => {
     try {
