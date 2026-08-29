@@ -217,6 +217,23 @@ class PokerGame {
     return false;
   }
 
+  setPlayerChips(playerId, amount) {
+    const player = this.getPlayer(playerId);
+    if (!player) return false;
+
+    const newAmount = Math.max(0, Math.floor(Number(amount)));
+    if (!Number.isFinite(newAmount)) return false;
+
+    const oldAmount = player.chips;
+    player.chips = newAmount;
+    if (newAmount > 0) {
+      player.folded = false;
+    }
+    this.log(`✏️ Host set ${player.name}'s chips: $${oldAmount.toLocaleString()} → $${newAmount.toLocaleString()}.`);
+    this.notifyState();
+    return true;
+  }
+
   // --- Game Flow & Round Management ---
 
   isGameActive() {
