@@ -68,6 +68,7 @@ const TRANSLATIONS = {
     away: "Away",
     reload_player_btn: "+ 💰 Reload",
     kick_player_btn: "✕ Kick",
+    edit_chips_btn: "✏️ Edit",
     
     // Actions
     btn_fold: "FOLD",
@@ -130,6 +131,7 @@ const TRANSLATIONS = {
     confirm_kick_player: "Are you sure you want to kick {name} from the table?",
     toast_kicked_player: "{name} was kicked from the table.",
     toast_you_were_kicked: "You were removed from the room by the host.",
+    toast_edited_chips: "Set {name}'s chips to \${amount}!",
     toast_copied_code: "Copied room code: {code}",
     toast_copied_link: "Invite link copied to clipboard!",
     toast_sound_on: "Sound Unmuted",
@@ -184,6 +186,7 @@ const TRANSLATIONS = {
     away: "غير متصل",
     reload_player_btn: "+ 💰 شحن",
     kick_player_btn: "✕ طرد",
+    edit_chips_btn: "✏️ تعديل",
     
     // Actions
     btn_fold: "انسحاب (FOLD)",
@@ -246,6 +249,7 @@ const TRANSLATIONS = {
     confirm_kick_player: "هل أنت متأكد من رغبتك في طرد {name} من الطاولة؟",
     toast_kicked_player: "تم طرد {name} من الطاولة.",
     toast_you_were_kicked: "تمت إزالتك من الغرفة من قبل المضيف.",
+    toast_edited_chips: "تم تعيين فيشات {name} إلى ${amount}!",
     toast_copied_code: "تم نسخ رمز الغرفة: {code}",
     toast_copied_link: "تم نسخ رابط الدعوة إلى الحافظة!",
     toast_sound_on: "تم تفعيل الصوت",
@@ -1182,6 +1186,12 @@ function renderSeats(state) {
         hostKickHtml = `<button class="host-kick-btn" onclick="handleHostKickPlayer('${player.id}')" title="Kick ${escapeHtml(player.name)}">${t('kick_player_btn')}</button>`;
       }
 
+      // Creator Edit Chips Button
+      let hostEditChipsHtml = '';
+      if (isHost) {
+        hostEditChipsHtml = `<button class="host-edit-chips-btn" onclick="handleHostEditChips('${player.id}')" title="Edit chips for ${escapeHtml(player.name)}">${t('edit_chips_btn')}</button>`;
+      }
+
       const youSuffix = isSelf ? (currentLang === 'ar' ? ' (أنت)' : ' (You)') : '';
 
       seatWrapper.innerHTML = `
@@ -1192,6 +1202,7 @@ function renderSeats(state) {
           ${actionTagHtml}
           ${hostRebuyHtml}
           ${hostKickHtml}
+          ${hostEditChipsHtml}
         </div>
         ${holeCardsHtml}
         ${betPillHtml}
@@ -1512,6 +1523,28 @@ function handleHostAdvanceStage() {
 
 function handleStartGame() {
   socket.emit('start_game');
+}
+
+function handleHostEditChips(playerId) {
+  const targetPlayer = lastGameState?.seats?.find(s => s && s.id === playerId);
+  const name = targetPlayer ? targetPlayer.name : (currentLang === 'ar' ? 'هذا اللاعب' : 'this player');
+  const currentChips = targetPlayer ? targetPlayer.chips : 0;
+
+  const promptMsg = currentLang === 'ar'
+    ? `أدخل عدد الفيشات الجديد لـ ${name} (الحالي: $${currentChips.toLocaleString()})`
+    : `Enter new chip amount for ${name} (current: $${currentChips.toLocaleString()})`;
+
+  const input = window.prompt(promptMsg, currentChips);
+  if (input === null) return; // cancelled
+
+  const newAmount = Math.floor(Number(input));
+  if (!Number.isFinite(newAmount) || newAmount < 0) {
+    showToast(currentLang === 'ar' ? 'مبلغ غير صالح' : 'Invalid amount', 'error');
+    return;
+  }
+
+  socket.emit('edit_player_chips', { targetPlayerId: playerId, amount: newAmount });
+  showToast(t('toast_edited_chips', { amount: newAmount.toLocaleString(), name }), 'success');
 }
 
 function handleHostRebuyPlayer(playerId) {
