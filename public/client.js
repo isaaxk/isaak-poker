@@ -1149,13 +1149,16 @@ function renderSeats(state) {
 
       // Hole Cards
       let holeCardsHtml = '<div class="seat-hole-cards">';
-      if (isSelf && state.self.holeCards && state.self.holeCards.length > 0 && !player.folded) {
-        // Self cards
+      if (isSelf && state.self.holeCards && state.self.holeCards.length > 0) {
+        // Self cards (Always visible to player, even after folding)
         state.self.holeCards.forEach(c => {
           const cardEl = createCardElement(c);
+          if (player.folded) {
+            cardEl.classList.add('card-folded');
+          }
           holeCardsHtml += cardEl.outerHTML;
         });
-      } else if (player.holeCards && player.holeCards.length > 0 && !player.folded) {
+      } else if (player.holeCards && player.holeCards.length > 0 && (!player.folded || state.stage === 'showdown' || state.stage === 'hand_ended')) {
         // Revealed showdown cards
         player.holeCards.forEach(c => {
           const cardEl = createCardElement(c);
@@ -1298,8 +1301,9 @@ function renderSelfHandStrength(state) {
 
   const helperEnabled = state.config && state.config.showHandHelper !== false;
 
-  if (helperEnabled && state.self && state.self.currentEvaluation && !state.self.folded && state.self.holeCards && state.self.holeCards.length > 0) {
-    nameEl.textContent = translateHandDescription(state.self.currentEvaluation.description || state.self.currentEvaluation.name);
+  if (helperEnabled && state.self && state.self.currentEvaluation && state.self.holeCards && state.self.holeCards.length > 0) {
+    const foldTag = state.self.folded ? (currentLang === 'ar' ? ' (منسحب)' : ' (Folded)') : '';
+    nameEl.textContent = translateHandDescription(state.self.currentEvaluation.description || state.self.currentEvaluation.name) + foldTag;
     el.classList.remove('hidden');
   } else {
     el.classList.add('hidden');

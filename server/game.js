@@ -958,7 +958,7 @@ class PokerGame {
 
     // Current best hand evaluation for the player previewing their own hand (if helper enabled)
     let currentEvaluation = null;
-    if (this.config.showHandHelper && player.holeCards.length > 0 && !player.folded) {
+    if (this.config.showHandHelper && player.holeCards && player.holeCards.length > 0) {
       currentEvaluation = evaluateHand(player.holeCards, this.communityCards);
     }
 
